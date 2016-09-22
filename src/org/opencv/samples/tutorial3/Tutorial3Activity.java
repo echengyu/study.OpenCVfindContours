@@ -1,6 +1,7 @@
 package org.opencv.samples.tutorial3;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.ListIterator;
@@ -9,7 +10,15 @@ import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
+import org.opencv.core.Core;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.MatOfPoint2f;
+import org.opencv.core.Point;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
+import org.opencv.imgproc.Imgproc;
+import org.opencv.imgproc.Moments;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
 
 import android.annotation.SuppressLint;
@@ -37,6 +46,15 @@ public class Tutorial3Activity extends Activity implements CvCameraViewListener2
     private SubMenu mColorEffectsMenu;
     private MenuItem[] mResolutionMenuItems;
     private SubMenu mResolutionMenu;
+    
+	private List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
+	private Mat hierarchy;
+	private Mat mIntermediateMat;
+	private MatOfPoint2f approxCurve;
+
+	/*OpenCv Variables*/
+	private Mat mRgba;
+	private Mat mGray;
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -104,7 +122,87 @@ public class Tutorial3Activity extends Activity implements CvCameraViewListener2
     }
 
     public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
-        return inputFrame.rgba();
+		Mat mRgba = inputFrame.rgba();
+		Point resolutionPoint = new Point(inputFrame.rgba().width(), inputFrame.rgba().height());
+
+		// 二值化
+		Imgproc.cvtColor(mRgba, mRgba, Imgproc.COLOR_RGBA2GRAY, 0);
+
+		// 高斯濾波器
+		Imgproc.GaussianBlur(mRgba, mRgba, new org.opencv.core.Size(3, 3), 6);
+
+		// 邊緣偵測
+		Imgproc.Canny(mRgba, mRgba, 360, 180);
+
+		// 蝕刻
+		Imgproc.erode(mRgba, mRgba, Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new org.opencv.core.Size(1, 1)));
+
+		// 膨脹
+		Imgproc.dilate(mRgba, mRgba, Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new org.opencv.core.Size(4, 4)));
+
+		contours = new ArrayList<MatOfPoint>();
+		hierarchy = new Mat();
+
+		// 找影像輪廓
+		Imgproc.findContours(mRgba, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE, new Point(0, 0));
+		hierarchy.release();
+
+//		// 劃出輪廓線
+//		Imgproc.drawContours(inputFrame.rgba(), contours, -1, new Scalar(255, 127, 63, 255));
+		
+		if(contours.size() != 0 &&contours.size() < 500){
+			
+			// 劃出輪廓線
+			Imgproc.drawContours(inputFrame.rgba(), contours, -1, new Scalar(255, 255, 0, 255));       	        
+	        
+	        //For each contour found
+	        approxCurve = new MatOfPoint2f();
+	        for (int i=0; i<contours.size(); i++)
+	        {
+	            //Convert contours(i) from MatOfPoint to MatOfPoint2f
+	            MatOfPoint2f contour2f = new MatOfPoint2f( contours.get(i).toArray() );	            
+//	            Log.e("contour2f", contour2f.toString());
+	            
+	            //Processing on mMOP2f1 which is in type MatOfPoint2f
+	            double approxDistance = Imgproc.arcLength(contour2f, true)*0.02;
+	            Log.e("approxDistance", String.valueOf(approxDistance));
+	            
+	            Imgproc.approxPolyDP(contour2f, approxCurve, approxDistance, true);
+
+	            //Convert back to MatOfPoint
+	            MatOfPoint points = new MatOfPoint( approxCurve.toArray() );
+
+	            // Get bounding rect of contour
+	            Rect rect = Imgproc.boundingRect(points);
+
+	            // draw enclosing rectangle (all same color, but you could use variable i to make them unique)
+//	            Core.rectangle(mRgba, new Point(rect.x,rect.y), new Point(rect.x+rect.width,rect.y+rect.height), new Scalar(0, 255, 0, 255), 2); 
+	        }
+	        
+//			List<Moments> mu = new ArrayList<Moments>(contours.size());
+//		    for (int i = 0; i < contours.size(); i++) {
+//		        mu.add(i, Imgproc.moments(contours.get(i), false));
+//		        Moments p = mu.get(i);
+//		        int x = (int) (p.get_m10() / p.get_m00());
+//		        int y = (int) (p.get_m01() / p.get_m00());
+//		        Log.e("sizeRgba", "("+x+", "+y+")");
+//		        Core.putText(mRgba, String.valueOf(i+1), new Point(x, y), 1, 1, new Scalar(255, 127, 0, 255), 2);
+//		    };
+
+			
+//			for(int i=0; i<contours.size(); i++){				
+//				int rows = (int) contours.get(i).size().height + 20;
+//		        int cols = (int) contours.get(i).size().width + 60;       
+//		        Log.e("sizeRgba", "("+rows+", "+cols+")");
+//		        Core.putText(mRgba, String.valueOf(i+1), new Point(rows, cols), 1, 1, new Scalar(255, 255, 0, 255), 2);
+//			}
+			
+		}else{
+			Core.trace(inputFrame.rgba());
+		}
+		double resolutionPointY = resolutionPoint.y - 15;
+		Core.putText(mRgba, String.valueOf(contours.size()), new Point(10, resolutionPointY), 3, 1, new Scalar(255, 0, 0, 255), 2);		
+		return mRgba;
     }
 
     @Override
@@ -116,16 +214,16 @@ public class Tutorial3Activity extends Activity implements CvCameraViewListener2
             return true;
         }
 
-        mColorEffectsMenu = menu.addSubMenu("Color Effect");
-        mEffectMenuItems = new MenuItem[effects.size()];
-
+//        mColorEffectsMenu = menu.addSubMenu("Color Effect");
+//        mEffectMenuItems = new MenuItem[effects.size()];
+        
         int idx = 0;
-        ListIterator<String> effectItr = effects.listIterator();
-        while(effectItr.hasNext()) {
-           String element = effectItr.next();
-           mEffectMenuItems[idx] = mColorEffectsMenu.add(1, idx, Menu.NONE, element);
-           idx++;
-        }
+//        ListIterator<String> effectItr = effects.listIterator();
+//        while(effectItr.hasNext()) {
+//           String element = effectItr.next();
+//           mEffectMenuItems[idx] = mColorEffectsMenu.add(1, idx, Menu.NONE, element);
+//           idx++;
+//        }
 
         mResolutionMenu = menu.addSubMenu("Resolution");
         mResolutionList = mOpenCvCameraView.getResolutionList();
@@ -167,12 +265,12 @@ public class Tutorial3Activity extends Activity implements CvCameraViewListener2
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         Log.i(TAG,"onTouch event");
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
-        String currentDateandTime = sdf.format(new Date());
-        String fileName = Environment.getExternalStorageDirectory().getPath() +
-                               "/sample_picture_" + currentDateandTime + ".jpg";
-        mOpenCvCameraView.takePicture(fileName);
-        Toast.makeText(this, fileName + " saved", Toast.LENGTH_SHORT).show();
+//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+//        String currentDateandTime = sdf.format(new Date());
+//        String fileName = Environment.getExternalStorageDirectory().getPath() +
+//                               "/sample_picture_" + currentDateandTime + ".jpg";
+//        mOpenCvCameraView.takePicture(fileName);
+//        Toast.makeText(this, fileName + " saved", Toast.LENGTH_SHORT).show();
         return false;
     }
 }
