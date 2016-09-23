@@ -165,15 +165,9 @@ public class Tutorial3Activity extends Activity implements CvCameraViewListener2
 		contours = new ArrayList<MatOfPoint>();
 		hierarchy = new Mat();
 
-		// 找影像輪廓
-		
+		// 找影像輪廓		
 		Imgproc.findContours(mRgba, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE, new Point(0, 0));
-//		Imgproc.findContours(mRgba, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_NONE, new Point(0, 0));
-//		Imgproc.findContours(mRgba, contours, hierarchy, Imgproc.RETR_CCOMP, Imgproc.CHAIN_APPROX_SIMPLE, new Point(0, 0));
 		hierarchy.release();
-
-//		// 劃出輪廓線
-//		Imgproc.drawContours(inputFrame.rgba(), contours, -1, new Scalar(255, 127, 63, 255));
 		
 		if(contours.size() != 0 &&contours.size() < 500){
 			
@@ -186,11 +180,9 @@ public class Tutorial3Activity extends Activity implements CvCameraViewListener2
 	        {
 	            //Convert contours(i) from MatOfPoint to MatOfPoint2f
 	            MatOfPoint2f contour2f = new MatOfPoint2f( contours.get(i).toArray() );	            
-//	            Log.e("contour2f", contour2f.toString());
 	            
 	            //Processing on mMOP2f1 which is in type MatOfPoint2f
 	            double approxDistance = Imgproc.arcLength(contour2f, true)*0.02;
-//	            Log.e("approxDistance", String.valueOf(approxDistance));
 	            
 	            Imgproc.approxPolyDP(contour2f, approxCurve, approxDistance, true);
 
@@ -208,27 +200,33 @@ public class Tutorial3Activity extends Activity implements CvCameraViewListener2
 	            	Point momentsPoint = new Point((int)(mu.get_m10() / mu.get_m00()), (int)(mu.get_m01() / mu.get_m00()));
 //	            	Core.circle(mRgba, momentsPoint, 10, new Scalar(255, 255, 0, 255), -1);
 			        Core.rectangle(mRgba, new Point(momentsPoint.x-10, momentsPoint.y-10), 
-			        		new Point(momentsPoint.x+10, momentsPoint.y+10), new Scalar(0, 255, 0, 255), 2); 
+			        		new Point(momentsPoint.x+10, momentsPoint.y+10), new Scalar(0, 255, 255, 255), 2); 
 	            	
 	            	// 面積
 			        // http://monkeycoding.com/?p=617
 		            double contourArea = Imgproc.contourArea(contour2f, false);
 		            Core.putText(mRgba, String.valueOf(contourArea), 
-	            			new Point(10, resolutionPoint.y - 45), 3, 1, new Scalar(255, 0, 0, 255), 2);
+	            			new Point(10, resolutionPoint.y - 45), 3, 1, new Scalar(0, 255, 128, 255), 2);
 		            
 		            // 周長
 		            // http://monkeycoding.com/?p=617
 		            double arcLength = Imgproc.arcLength(contour2f, true);
 		            Core.putText(mRgba, String.valueOf(arcLength), 
-	            			new Point(10, resolutionPoint.y - 15), 3, 1, new Scalar(255, 0, 0, 255), 2);
+	            			new Point(10, resolutionPoint.y - 15), 3, 1, new Scalar(0, 255, 128, 255), 2);
 		            
-		            // 凸殼
-		            // http://monkeycoding.com/?p=612
-		            MatOfInt mOi= new MatOfInt();
-		            Imgproc.convexHull(contours.get(i), mOi);                    
-                    Point convexHullPoint = contours.get(i).toList().get(mOi.toList().get(i));
-                    Core.circle(mRgba, convexHullPoint, 10, new Scalar(255, 0, 0, 255), -1);
+//		            // 凸殼
+//		            // http://monkeycoding.com/?p=612
+//		            MatOfInt mOi= new MatOfInt();
+//		            Imgproc.convexHull(contours.get(i), mOi);                    
+//                    Point convexHullPoint = contours.get(i).toList().get(mOi.toList().get(i));
+//                    Core.circle(mRgba, convexHullPoint, 10, new Scalar(255, 0, 0, 255), -1);
 
+	            }else{
+	            	Moments mu = Imgproc.moments(contours.get(i), false);
+	            	Point momentsPoint = new Point((int)(mu.get_m10() / mu.get_m00()), (int)(mu.get_m01() / mu.get_m00()));
+//	            	Core.circle(mRgba, momentsPoint, 10, new Scalar(255, 255, 0, 255), -1);
+			        Core.rectangle(mRgba, new Point(momentsPoint.x-10, momentsPoint.y-10), 
+			        		new Point(momentsPoint.x+10, momentsPoint.y+10), new Scalar(0, 255, 0, 255), 2); 
 	            }
 	            
 //	            Point centerPoint = new Point(rect.x+(rect.width)/2, rect.y+(rect.height)/2);
@@ -261,7 +259,7 @@ public class Tutorial3Activity extends Activity implements CvCameraViewListener2
 		}else{
 			Core.trace(inputFrame.rgba());
 		}
-//		Core.putText(mRgba, String.valueOf(contours.size()), new Point(10, resolutionPoint.y - 15), 3, 1, new Scalar(255, 0, 0, 255), 2);		
+		Core.putText(mRgba, String.valueOf(contours.size()), new Point(10, resolutionPoint.y - 75), 3, 1, new Scalar(255, 0, 0, 255), 2);		
 		return mRgba;
     }
 
@@ -305,23 +303,23 @@ public class Tutorial3Activity extends Activity implements CvCameraViewListener2
     public boolean onOptionsItemSelected(MenuItem item) {
         Log.i(TAG, "called onOptionsItemSelected; selected item: " + item);
         
-        Toast.makeText(this, String.valueOf(item.getItemId()), Toast.LENGTH_SHORT).show();
+//        Toast.makeText(this, String.valueOf(item.getItemId()), Toast.LENGTH_SHORT).show();
         
-//        if (item.getGroupId() == 1)
-//        {
-//            mOpenCvCameraView.setEffect((String) item.getTitle());
-//            Toast.makeText(this, mOpenCvCameraView.getEffect(), Toast.LENGTH_SHORT).show();
-//        }
-//        else if (item.getGroupId() == 2)
-//        {	
-//        	
-//            int id = item.getItemId();
-//            Size resolution = mResolutionList.get(id);
-//            mOpenCvCameraView.setResolution(resolution);
-//            resolution = mOpenCvCameraView.getResolution();
-//            String caption = Integer.valueOf(resolution.width).toString() + "x" + Integer.valueOf(resolution.height).toString();
-//            Toast.makeText(this, caption, Toast.LENGTH_SHORT).show();
-//        }
+        if (item.getGroupId() == 1)
+        {
+            mOpenCvCameraView.setEffect((String) item.getTitle());
+            Toast.makeText(this, mOpenCvCameraView.getEffect(), Toast.LENGTH_SHORT).show();
+        }
+        else if (item.getGroupId() == 2)
+        {	
+        	
+            int id = item.getItemId();
+            Size resolution = mResolutionList.get(id);
+            mOpenCvCameraView.setResolution(resolution);
+            resolution = mOpenCvCameraView.getResolution();
+            String caption = Integer.valueOf(resolution.width).toString() + "x" + Integer.valueOf(resolution.height).toString();
+            Toast.makeText(this, caption, Toast.LENGTH_SHORT).show();
+        }
 
         return true;
     }
