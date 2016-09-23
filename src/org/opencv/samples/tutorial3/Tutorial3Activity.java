@@ -23,6 +23,7 @@ import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.graphics.Camera;
 import android.hardware.Camera.Size;
 import android.os.Bundle;
 import android.os.Environment;
@@ -51,10 +52,13 @@ public class Tutorial3Activity extends Activity implements CvCameraViewListener2
 	private Mat hierarchy;
 	private Mat mIntermediateMat;
 	private MatOfPoint2f approxCurve;
+	private Size resolution = null;
 
 	/*OpenCv Variables*/
 	private Mat mRgba;
 	private Mat mGray;
+	
+	boolean onCameraViewStarted = true;
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -92,6 +96,9 @@ public class Tutorial3Activity extends Activity implements CvCameraViewListener2
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
 
         mOpenCvCameraView.setCvCameraViewListener(this);
+      
+
+        
     }
 
     @Override
@@ -99,7 +106,7 @@ public class Tutorial3Activity extends Activity implements CvCameraViewListener2
     {
         super.onPause();
         if (mOpenCvCameraView != null)
-            mOpenCvCameraView.disableView();
+            mOpenCvCameraView.disableView(); 
     }
 
     @Override
@@ -116,6 +123,20 @@ public class Tutorial3Activity extends Activity implements CvCameraViewListener2
     }
 
     public void onCameraViewStarted(int width, int height) {
+    	if(onCameraViewStarted == true){
+    		onCameraViewStarted = false;
+	        mResolutionList = mOpenCvCameraView.getResolutionList();
+	        for(int i=0; i<mResolutionList.size(); i++){
+	        	Log.e("mResolutionList", mResolutionList.get(i).height+", "+mResolutionList.get(i).width);
+	        	if(mResolutionList.get(i).width == 640){
+	        		resolution = mResolutionList.get(i);
+	        		mOpenCvCameraView.setResolution(resolution);
+	        		resolution = mOpenCvCameraView.getResolution();
+	        		String caption = Integer.valueOf(resolution.width).toString() + "x" + Integer.valueOf(resolution.height).toString();
+	        		Toast.makeText(this, caption, Toast.LENGTH_SHORT).show();
+	        	}
+	        }
+        }
     }
 
     public void onCameraViewStopped() {
@@ -165,7 +186,7 @@ public class Tutorial3Activity extends Activity implements CvCameraViewListener2
 	            
 	            //Processing on mMOP2f1 which is in type MatOfPoint2f
 	            double approxDistance = Imgproc.arcLength(contour2f, true)*0.02;
-	            Log.e("approxDistance", String.valueOf(approxDistance));
+//	            Log.e("approxDistance", String.valueOf(approxDistance));
 	            
 	            Imgproc.approxPolyDP(contour2f, approxCurve, approxDistance, true);
 
@@ -237,6 +258,8 @@ public class Tutorial3Activity extends Activity implements CvCameraViewListener2
                     Integer.valueOf(element.width).toString() + "x" + Integer.valueOf(element.height).toString());
             idx++;
          }
+        
+//        mColorEffectsMenu = menu.addSubMenu("Color Effect");
 
         return true;
     }
@@ -249,7 +272,8 @@ public class Tutorial3Activity extends Activity implements CvCameraViewListener2
             Toast.makeText(this, mOpenCvCameraView.getEffect(), Toast.LENGTH_SHORT).show();
         }
         else if (item.getGroupId() == 2)
-        {
+        {	
+        	
             int id = item.getItemId();
             Size resolution = mResolutionList.get(id);
             mOpenCvCameraView.setResolution(resolution);
