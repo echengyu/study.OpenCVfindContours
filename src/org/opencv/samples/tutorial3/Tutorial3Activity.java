@@ -54,10 +54,6 @@ public class Tutorial3Activity extends Activity implements CvCameraViewListener2
 	private Mat mIntermediateMat;
 	private MatOfPoint2f approxCurve;
 	private Size resolution = null;
-
-	/*OpenCv Variables*/
-	private Mat mRgba;
-	private Mat mGray;
 	
 	boolean onCameraViewStarted = true;
 
@@ -170,7 +166,7 @@ public class Tutorial3Activity extends Activity implements CvCameraViewListener2
 		hierarchy.release();
 		
 		if(contours.size() != 0 &&contours.size() < 500){
-			
+						
 			// 劃出輪廓線
 			Imgproc.drawContours(inputFrame.rgba(), contours, -1, new Scalar(255, 255, 0, 255), 1);       	        
 	        
@@ -233,7 +229,7 @@ public class Tutorial3Activity extends Activity implements CvCameraViewListener2
 //		        Core.rectangle(mRgba, new Point(centerPoint.x-10, centerPoint.y-10), 
 //		        		new Point(centerPoint.x+10, centerPoint.y+10), new Scalar(0, 255, 0, 255), 2); 
 	            
-	            // draw enclosing rectangle (all same color, but you could use variable i to make them unique)
+//	            // draw enclosing rectangle (all same color, but you could use variable i to make them unique)
 //	            Core.rectangle(mRgba, new Point(rect.x,rect.y), new Point(rect.x+rect.width,rect.y+rect.height), new Scalar(0, 255, 0, 255), 2); 
 	        }
 	        
@@ -255,11 +251,24 @@ public class Tutorial3Activity extends Activity implements CvCameraViewListener2
 //		        Log.e("sizeRgba", "("+rows+", "+cols+")");
 //		        Core.putText(mRgba, String.valueOf(i+1), new Point(rows, cols), 1, 1, new Scalar(255, 255, 0, 255), 2);
 //			}
+	        
+	        // 找影像輪廓數量顯示
+ 			Core.putText(mRgba, String.valueOf(contours.size()), new Point(10, resolutionPoint.y - 75), 3, 1, new Scalar(255, 0, 0, 255), 2);
 			
 		}else{
 			Core.trace(inputFrame.rgba());
+			
+			// 找影像輪廓數量顯示
+			Core.putText(mRgba, String.valueOf(0), new Point(10, resolutionPoint.y - 75), 3, 1, new Scalar(255, 0, 0, 255), 2);
+			
+        	// 面積
+            Core.putText(mRgba, String.valueOf(0), 
+        			new Point(10, resolutionPoint.y - 45), 3, 1, new Scalar(0, 255, 128, 255), 2);
+            
+            // 周長
+            Core.putText(mRgba, String.valueOf(0), 
+        			new Point(10, resolutionPoint.y - 15), 3, 1, new Scalar(0, 255, 128, 255), 2);
 		}
-		Core.putText(mRgba, String.valueOf(contours.size()), new Point(10, resolutionPoint.y - 75), 3, 1, new Scalar(255, 0, 0, 255), 2);		
 		return mRgba;
     }
 
