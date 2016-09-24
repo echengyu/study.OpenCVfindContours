@@ -54,6 +54,8 @@ public class Tutorial3Activity extends Activity implements CvCameraViewListener2
 	private Mat mIntermediateMat;
 	private MatOfPoint2f approxCurve;
 	private Size resolution = null;
+	private Mat findContoursMat;
+	private Mat                    mRgba;
 	
 	boolean onCameraViewStarted = true;
 
@@ -120,6 +122,7 @@ public class Tutorial3Activity extends Activity implements CvCameraViewListener2
     }
 
     public void onCameraViewStarted(int width, int height) {
+		mRgba = new Mat();
     	if(onCameraViewStarted == true){
     		onCameraViewStarted = false;
 	        mResolutionList = mOpenCvCameraView.getResolutionList();
@@ -137,38 +140,42 @@ public class Tutorial3Activity extends Activity implements CvCameraViewListener2
     }
 
     public void onCameraViewStopped() {
+    	mRgba.release();
     }
 
     public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
-		Mat mRgba = inputFrame.rgba();
+		mRgba = inputFrame.rgba();
 		Point resolutionPoint = new Point(inputFrame.rgba().width(), inputFrame.rgba().height());
 
+		findContoursMat = new Mat();
+		mRgba.copyTo(findContoursMat);
+		
 		// 二值化
-		Imgproc.cvtColor(mRgba, mRgba, Imgproc.COLOR_RGBA2GRAY, 0);
+		Imgproc.cvtColor(findContoursMat, findContoursMat, Imgproc.COLOR_RGBA2GRAY, 0);
 
 		// 高斯濾波器
-		Imgproc.GaussianBlur(mRgba, mRgba, new org.opencv.core.Size(3, 3), 6);
+		Imgproc.GaussianBlur(findContoursMat, findContoursMat, new org.opencv.core.Size(3, 3), 6);
 
 		// 邊緣偵測
-		Imgproc.Canny(mRgba, mRgba, 360, 180);
+		Imgproc.Canny(findContoursMat, findContoursMat, 360, 180);
 
 		// 蝕刻
-		Imgproc.erode(mRgba, mRgba, Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new org.opencv.core.Size(1, 1)));
+		Imgproc.erode(findContoursMat, findContoursMat, Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new org.opencv.core.Size(1, 1)));
 
 		// 膨脹
-		Imgproc.dilate(mRgba, mRgba, Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new org.opencv.core.Size(4, 4)));
+		Imgproc.dilate(findContoursMat, findContoursMat, Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new org.opencv.core.Size(4, 4)));
 
 		contours = new ArrayList<MatOfPoint>();
 		hierarchy = new Mat();
 
-		// 找影像輪廓		
-		Imgproc.findContours(mRgba, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE, new Point(0, 0));
+		// 找影像輪廓
+		Imgproc.findContours(findContoursMat, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE, new Point(0, 0));
 		hierarchy.release();
 		
 		if(contours.size() != 0 &&contours.size() < 500){
 						
 			// 劃出輪廓線
-			Imgproc.drawContours(inputFrame.rgba(), contours, -1, new Scalar(255, 255, 0, 255), 1);       	        
+			Imgproc.drawContours(mRgba, contours, -1, new Scalar(255, 255, 0, 255), 1);       	        
 	        
 	        //For each contour found
 	        approxCurve = new MatOfPoint2f();
@@ -256,7 +263,6 @@ public class Tutorial3Activity extends Activity implements CvCameraViewListener2
  			Core.putText(mRgba, String.valueOf(contours.size()), new Point(10, resolutionPoint.y - 75), 3, 1, new Scalar(255, 0, 0, 255), 2);
 			
 		}else{
-			Core.trace(inputFrame.rgba());
 			
 			// 找影像輪廓數量顯示
 			Core.putText(mRgba, String.valueOf(0), new Point(10, resolutionPoint.y - 75), 3, 1, new Scalar(255, 0, 0, 255), 2);
