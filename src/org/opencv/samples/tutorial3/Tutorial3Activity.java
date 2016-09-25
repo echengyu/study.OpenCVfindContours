@@ -197,25 +197,26 @@ public class Tutorial3Activity extends Activity implements CvCameraViewListener2
 	            
 	            if(i==0){
 	            	
-	            	// 質心
-	            	// http://monkeycoding.com/?p=617
-	            	Moments mu = Imgproc.moments(contours.get(i), false);
-	            	Point momentsPoint = new Point((int)(mu.get_m10() / mu.get_m00()), (int)(mu.get_m01() / mu.get_m00()));
-	            	Core.circle(mRgba, momentsPoint, 3, new Scalar(255, 255, 0, 255), -1);
+//	            	// 質心
+//	            	// http://monkeycoding.com/?p=617
+//	            	Moments mu = Imgproc.moments(contours.get(i), false);
+//	            	Point momentsPoint = new Point((int)(mu.get_m10() / mu.get_m00()), (int)(mu.get_m01() / mu.get_m00()));
+//	            	Core.circle(mRgba, momentsPoint, 3, new Scalar(0, 255, 255, 255), -1);
+//	            	Core.circle(mRgba, momentsPoint, 3, new Scalar(0, 255, 0, 255), -1);
 //			        Core.rectangle(mRgba, new Point(momentsPoint.x-10, momentsPoint.y-10), 
 //			        		new Point(momentsPoint.x+10, momentsPoint.y+10), new Scalar(0, 255, 255, 255), 2); 
 	            	
-	            	// 面積
-			        // http://monkeycoding.com/?p=617
-		            double contourArea = Imgproc.contourArea(contour2f, false);
-		            Core.putText(mRgba, String.valueOf(contourArea), 
-	            			new Point(10, resolutionPoint.y - 45), 3, 1, new Scalar(0, 255, 128, 255), 2);
+//	            	// 面積
+//			        // http://monkeycoding.com/?p=617
+//		            double contourArea = Imgproc.contourArea(contour2f, false);
+//		            Core.putText(mRgba, String.valueOf(contourArea), 
+//	            			new Point(10, resolutionPoint.y - 45), 3, 1, new Scalar(0, 255, 128, 255), 2);
 		            
-		            // 周長
-		            // http://monkeycoding.com/?p=617
-		            double arcLength = Imgproc.arcLength(contour2f, true);
-		            Core.putText(mRgba, String.valueOf(arcLength), 
-	            			new Point(10, resolutionPoint.y - 15), 3, 1, new Scalar(0, 255, 128, 255), 2);
+//		            // 周長
+//		            // http://monkeycoding.com/?p=617
+//		            double arcLength = Imgproc.arcLength(contour2f, true);
+//		            Core.putText(mRgba, String.valueOf(arcLength), 
+//	            			new Point(10, resolutionPoint.y - 15), 3, 1, new Scalar(0, 255, 128, 255), 2);
 		            
 //		            // 凸殼
 //		            // http://monkeycoding.com/?p=612
@@ -225,9 +226,9 @@ public class Tutorial3Activity extends Activity implements CvCameraViewListener2
 //                    Core.circle(mRgba, convexHullPoint, 10, new Scalar(255, 0, 0, 255), -1);
 
 	            }else{
-	            	Moments mu = Imgproc.moments(contours.get(i), false);
-	            	Point momentsPoint = new Point((int)(mu.get_m10() / mu.get_m00()), (int)(mu.get_m01() / mu.get_m00()));
-	            	Core.circle(mRgba, momentsPoint, 3, new Scalar(255, 255, 0, 255), -1);
+//	            	Moments mu = Imgproc.moments(contours.get(i), false);
+//	            	Point momentsPoint = new Point((int)(mu.get_m10() / mu.get_m00()), (int)(mu.get_m01() / mu.get_m00()));
+//	            	Core.circle(mRgba, momentsPoint, 3, new Scalar(0, 255, 0, 255), -1);
 //			        Core.rectangle(mRgba, new Point(momentsPoint.x-10, momentsPoint.y-10), 
 //			        		new Point(momentsPoint.x+10, momentsPoint.y+10), new Scalar(0, 255, 0, 255), 2); 
 	            }	            
@@ -256,20 +257,22 @@ public class Tutorial3Activity extends Activity implements CvCameraViewListener2
 //			}
 	        
 	        // 找影像輪廓數量顯示
- 			Core.putText(mRgba, String.valueOf(contours.size()), new Point(10, resolutionPoint.y - 75), 3, 1, new Scalar(255, 0, 0, 255), 2);
+// 			Core.putText(mRgba, String.valueOf(contours.size()), new Point(10, resolutionPoint.y - 75), 3, 1, new Scalar(255, 0, 0, 255), 2);
+ 			Core.putText(mRgba, String.valueOf(contours.size()), new Point(10, resolutionPoint.y - 15), 3, 1, new Scalar(255, 0, 0, 255), 2);
 			
 		}else{
 			
 			// 找影像輪廓數量顯示
-			Core.putText(mRgba, String.valueOf(0), new Point(10, resolutionPoint.y - 75), 3, 1, new Scalar(255, 0, 0, 255), 2);
+//			Core.putText(mRgba, String.valueOf(0), new Point(10, resolutionPoint.y - 75), 3, 1, new Scalar(255, 0, 0, 255), 2);
+			Core.putText(mRgba, String.valueOf(0), new Point(10, resolutionPoint.y - 15), 3, 1, new Scalar(255, 0, 0, 255), 2);
 			
-        	// 面積
-            Core.putText(mRgba, String.valueOf(0), 
-        			new Point(10, resolutionPoint.y - 45), 3, 1, new Scalar(0, 255, 128, 255), 2);
-            
-            // 周長
-            Core.putText(mRgba, String.valueOf(0), 
-        			new Point(10, resolutionPoint.y - 15), 3, 1, new Scalar(0, 255, 128, 255), 2);
+//        	// 面積
+//            Core.putText(mRgba, String.valueOf(0), 
+//        			new Point(10, resolutionPoint.y - 45), 3, 1, new Scalar(0, 255, 128, 255), 2);
+//            
+//            // 周長
+//            Core.putText(mRgba, String.valueOf(0), 
+//        			new Point(10, resolutionPoint.y - 15), 3, 1, new Scalar(0, 255, 128, 255), 2);
 		}
 		return mRgba;
     }
